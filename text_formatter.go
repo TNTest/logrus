@@ -3,6 +3,7 @@ package logrus
 import (
 	"bytes"
 	"fmt"
+	"runtime"
 	"sort"
 	"strings"
 	"time"
@@ -28,12 +29,16 @@ type TextFormatter struct {
 	// Set to true to bypass checking for a TTY before outputting colors.
 	ForceColors   bool
 	DisableColors bool
+	ShowLineNum   bool
 }
 
 func (f *TextFormatter) Format(entry *Entry) ([]byte, error) {
 	b := &bytes.Buffer{}
-
 	prefixFieldClashes(entry)
+	if f.ShowLineNum {
+		//fmt.Println("enable show line number")
+		entry.Data["caller"] = GetCallerWithLn()
+	}
 
 	if (f.ForceColors || IsTerminal()) && !f.DisableColors {
 		levelText := strings.ToUpper(entry.Data["level"].(string))[0:4]
@@ -83,4 +88,22 @@ func (f *TextFormatter) AppendKeyValue(b *bytes.Buffer, key, value interface{}) 
 	} else {
 		fmt.Fprintf(b, "%v=%v ", key, value)
 	}
+}
+
+func GetCallerWithLn() (caller string) {
+	var ok bool
+	_, file, line, ok := runtime.Caller(6)
+	if !ok {
+		file = "???"
+		line = 0
+	}
+	short := file
+	for i := len(file) - 1; i > 0; i-- {
+		if file[i] == '/' {
+			short = file[i+1:]
+			break
+		}
+	}
+	file = short
+	return fmt.Sprintf("%v:%v", file, line)
 }
