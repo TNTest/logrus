@@ -300,6 +300,17 @@ The built-in logging formatters are:
   * *Note:* to force colored output when there is no TTY, set the `ForceColors`
     field to `true`.  To force no colored output even if there is a TTY  set the 
     `DisableColors` field to `true`
+  * To show caller file and line number, set "ShowShowLineNum" to true, a field 
+    "caller" will be appanded. For example:
+```go
+    log := &logrus.Logger{
+    Out:       os.Stderr,
+    Formatter: &logrus.TextFormatter{ShowLineNum: true},
+    Hooks:     make(logrus. levelHooks),
+    Level: logrus.DebugLevel,
+  }
+```
+
 * `logrus.JSONFormatter`. Logs fields as JSON.
 
 Third party logging formatters:
